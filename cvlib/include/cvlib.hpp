@@ -29,7 +29,7 @@ class motion_segmentation : public cv::BackgroundSubtractor
 {
     public:
     /// \brief ctor
-    motion_segmentation() {};
+    motion_segmentation(){};
 
     /// \see cv::BackgroundSubtractor::apply
     void apply(cv::InputArray image, cv::OutputArray fgmask, double alpha = 0) override;
@@ -40,10 +40,10 @@ class motion_segmentation : public cv::BackgroundSubtractor
         backgroundImage.assign(bg_model_);
     }
 
-	void setVarThreshold(int varThreshold)
-	{
+    void setVarThreshold(int varThreshold)
+    {
         varThreshold_ = varThreshold;
-	}
+    }
 
     private:
     cv::Mat bg_model_;

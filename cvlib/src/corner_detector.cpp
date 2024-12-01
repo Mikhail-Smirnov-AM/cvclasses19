@@ -24,7 +24,7 @@ void corner_detector_fast::detect(cv::InputArray image, CV_OUT std::vector<cv::K
     if (image_mat.channels() > 1)
 		cv::cvtColor(image, image_mat, cv::COLOR_BGR2GRAY);
 
-    int t = 10;
+    int t = 25;
     int N_t = 12;
     keypoints.clear();
 
@@ -93,35 +93,67 @@ void corner_detector_fast::detect(cv::InputArray image, CV_OUT std::vector<cv::K
                  
                 // save key point
                 if (N >= N_t)
-                    keypoints.push_back(cv::KeyPoint((float)j, (float)i, 1));
+                    keypoints.push_back(cv::KeyPoint((float)j, (float)i, 1, -1, 0, 0, 0));
             }
         }
     }
     
 }
 
-void corner_detector_fast::compute(cv::InputArray, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors)
+void corner_detector_fast::compute(cv::InputArray image, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors)
 {
-    std::srand(unsigned(std::time(0))); // \todo remove me
-    // \todo implement any binary descriptor
-    const int desc_length = 2;
+    cv::Mat image_mat = image.getMat();
+    if (image_mat.channels() > 1)
+        cv::cvtColor(image, image_mat, cv::COLOR_BGR2GRAY);
+	
+	std::srand(unsigned(std::time(0)));
+    const int desc_length = 128;
     descriptors.create(static_cast<int>(keypoints.size()), desc_length, CV_32S);
     auto desc_mat = descriptors.getMat();
     desc_mat.setTo(0);
 
+	int rows = image_mat.rows;
+    int cols = image_mat.cols;
+
+    int width = 20;
+    int height = 20;
+
     int* ptr = reinterpret_cast<int*>(desc_mat.ptr());
     for (const auto& pt : keypoints)
     {
+        int pt_x = static_cast<int>(pt.pt.x);
+        int pt_y = static_cast<int>(pt.pt.y);
+
+        int tl_x = std::max(pt_x - width / 2, 0);
+        int tl_y = std::max(pt_y - height / 2, 0);
+        int roi_w = std::min(cols - pt_x, width);
+        int roi_h = std::min(rows - pt_y, height);
+		
+		
+		cv::Rect roi(tl_x, tl_y, roi_w, roi_h);
+        cv::Mat img_roi = image_mat(roi);
+
         for (int i = 0; i < desc_length; ++i)
         {
-            *ptr = std::rand();
+            // first point
+            int x1 = std::rand() % roi_w;
+            int y1 = std::rand() % roi_h;
+			
+            // second point
+            int x2 = std::rand() % roi_w;
+            int y2 = std::rand() % roi_h;
+    		
+			*ptr = img_roi.at<unsigned short>(x1,y1) < img_roi.at<unsigned short>(x2,y2);
             ++ptr;
         }
     }
 }
 
-void corner_detector_fast::detectAndCompute(cv::InputArray, cv::InputArray, std::vector<cv::KeyPoint>&, cv::OutputArray descriptors, bool /*= false*/)
-    {
-        // \todo implement me
-    }
+void corner_detector_fast::detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints,
+                                            cv::OutputArray descriptors, bool useProvidedKeypoints)
+{
+	if (!useProvidedKeypoints)
+		detect(image, keypoints, mask);
+    compute(image, keypoints, descriptors);
+}
 } // namespace cvlib
