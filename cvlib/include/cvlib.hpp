@@ -67,11 +67,19 @@ class corner_detector_fast : public cv::Feature2D
     virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors,
                                   bool useProvidedKeypoints = false) override;
 
+	void generate_pattern(const int roi_w_, const int roi_h_);
+
     /// \see Feature2d::getDefaultName
     virtual cv::String getDefaultName() const override
     {
         return "FAST_Binary";
     }
+
+    private:
+    const int desc_length = 128;
+    int roi_w;
+    int roi_h;
+    std::pair<cv::Point2f, cv::Point2f> pattern[128];
 };
 
 /// \brief Descriptor matched based on ratio of SSD

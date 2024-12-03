@@ -23,6 +23,7 @@ int demo_feature_descriptor(int argc, char* argv[])
 
     cv::Mat frame;
     auto detector_a = cvlib::corner_detector_fast::create();
+    detector_a->generate_pattern(20, 20);
     auto detector_b = cv::ORB::create();
     std::vector<cv::KeyPoint> corners;
     cv::Mat descriptors;
