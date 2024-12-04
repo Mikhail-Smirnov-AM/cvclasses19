@@ -23,7 +23,8 @@ int demo_feature_descriptor(int argc, char* argv[])
 
     cv::Mat frame;
     auto detector_a = cvlib::corner_detector_fast::create();
-    auto detector_b = cv::KAZE::create();
+    detector_a->generate_pattern(20, 20);
+    auto detector_b = cv::ORB::create();
     std::vector<cv::KeyPoint> corners;
     cv::Mat descriptors;
 
@@ -34,11 +35,15 @@ int demo_feature_descriptor(int argc, char* argv[])
         cap >> frame;
         cv::imshow(main_wnd, frame);
 
-        detector_b->detect(frame, corners); // \todo use your detector (detector_b)
+        detector_a->detect(frame, corners);
         cv::drawKeypoints(frame, corners, frame, cv::Scalar(0, 0, 255));
 
         utils::put_fps_text(frame, fps);
-        // \todo add count of the detected corners at the top left corner of the image. Use green text color.
+        cv::putText(frame,
+                    std::to_string(corners.size()), // number of corners
+                    cv::Point(frame.rows / 50, frame.cols / 50), // top-left position
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(0, 255, 0), // green color
+                    1);
         cv::imshow(demo_wnd, frame);
 
         pressed_key = cv::waitKey(30);
