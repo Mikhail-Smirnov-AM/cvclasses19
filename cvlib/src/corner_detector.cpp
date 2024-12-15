@@ -43,8 +43,8 @@ void corner_detector_fast::detect(cv::InputArray image, CV_OUT std::vector<cv::K
     if (image_mat.channels() > 1)
         cv::cvtColor(image, image_mat, cv::COLOR_BGR2GRAY);
 
-    int t = 25;
-    int N_t = 12;
+    int t = 30;
+    int N_t = 14;
     keypoints.clear();
 
     int rows = image_mat.rows;
